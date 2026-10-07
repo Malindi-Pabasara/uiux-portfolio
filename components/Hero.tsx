@@ -98,9 +98,9 @@ export default function Hero({ name, tagline, bio, available, stats, cvUrl, avat
 
           <h1 className="fade-in d2 font-bold font-['Space_Grotesk'] mb-5 tracking-tight"
               style={{ fontSize: 'clamp(2rem, 6vw, 3.6rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>
-            Building full‑stack
+            Crafting simple,
             <span className="block bg-gradient-to-r from-[#9d6bff] to-[#41c7ff] text-transparent bg-clip-text">
-              systems that work.
+              user-friendly digital experiences.
             </span>
           </h1>
 

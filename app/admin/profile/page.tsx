@@ -13,9 +13,9 @@ interface ProfileData {
 const DEFAULT: ProfileData = {
   name: '', title: '', tagline: '', bio: '', available: true,
   stats: [
-    { label: 'systems built', value: 3, suffix: '' },
-    { label: 'certifications', value: 3, suffix: '' },
-    { label: 'tools & languages', value: 10, suffix: '+' },
+    { label: 'Design Projects', value: 3, suffix: '' },
+    { label: 'Certifications', value: 3, suffix: '' },
+    { label: 'Design Tools', value: 5, suffix: '+' },
   ],
   email: '', phone: '', linkedin: '', github: '', cvUrl: '', avatarUrl: '',
 };

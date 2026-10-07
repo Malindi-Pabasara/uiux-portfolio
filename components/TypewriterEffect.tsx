@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-const words = ["UI/UX designer", "frontend developer", "mobile app developer"];
+const words = ["UI/UX Designer", "Visual Interface Designer", "Product Designer"];
 
 export default function TypewriterEffect() {
   const [text, setText] = useState('');
