@@ -10,7 +10,7 @@ export default function About() {
           <RevealWrapper>
             <div className="about-panel" style={{ height: '100%' }}>
               <p>
-                An ambitious IT professional and HNDIT student with a strong passion for UI/UX design. I combine a solid foundation in technology with a creative eye, focusing on creating simple, user-friendly digital experiences that solve real-world problems.
+                HNDIT student with a strong interest in UI/UX design and creating simple, user-friendly digital experiences. Skilled in Figma, wireframing, prototyping, user flows, and visual interface design. Looking for a UI/UX internship to develop practical design skills and contribute to real-world digital products.
               </p>
             </div>
           </RevealWrapper>
@@ -21,8 +21,8 @@ export default function About() {
                   <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <b>User-Centered Design</b>
-                  <span>Creating simple, intuitive, and engaging digital experiences tailored for users.</span>
+                  <b>Visual Interface &amp; UI Design</b>
+                  <span>Skilled in Figma, Canva, wireframing, prototyping, user flows, and designing responsive web interfaces.</span>
                 </div>
               </div>
               <div className="fi">
@@ -30,8 +30,8 @@ export default function About() {
                   <path d="M4 4v16h16M8 16l3-4 3 3 4-6" />
                 </svg>
                 <div>
-                  <b>Visual Interface Design</b>
-                  <span>Skilled in wireframing, prototyping, user flows, and high-fidelity mockups in Figma.</span>
+                  <b>User Experience (UX)</b>
+                  <span>Applying basic user research, user personas, usability principles, and design thinking to create engaging experiences.</span>
                 </div>
               </div>
               <div className="fi">
@@ -40,7 +40,7 @@ export default function About() {
                 </svg>
                 <div>
                   <b>Design Fundamentals</b>
-                  <span>Applying strong typography, layout principles, and usability heuristics to every project.</span>
+                  <span>Strong grasp of typography, color, and layout principles to design aesthetically pleasing digital products.</span>
                 </div>
               </div>
             </div>
