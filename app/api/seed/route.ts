@@ -73,22 +73,25 @@ export async function POST(req: Request) {
     {
       title: 'Optical Service System',
       description: 'A user-friendly interface to manage customers, appointments and optical service records end to end.',
-      tags: ['HTML/CSS', 'Node.js', 'MySQL'],
+      tags: ['Figma', 'Wireframing', 'UI Design', 'Prototyping'],
       link: '#',
+      prototypeUrl: '#',
       order: 0,
     },
     {
       title: 'Hospital System',
       description: 'A system to manage patient information, appointments and hospital records for clinical staff.',
-      tags: ['PHP', 'MySQL'],
+      tags: ['Figma', 'User Flow', 'Responsive Design'],
       link: '#',
+      prototypeUrl: '#',
       order: 1,
     },
     {
       title: 'Tea Shop Management',
       description: 'A web-based system to manage products, orders and customer information for a small retail shop.',
-      tags: ['JavaScript'],
+      tags: ['Wireframing', 'Canva', 'UI Design'],
       link: '#',
+      prototypeUrl: '#',
       order: 2,
     },
   ]);

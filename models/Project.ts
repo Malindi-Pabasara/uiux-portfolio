@@ -5,6 +5,7 @@ export interface IProject extends Document {
   description: string;
   tags: string[];
   link: string;
+  prototypeUrl: string;
   order: number;
   imageUrl: string;
   category: 'fullstack' | 'uiux';
@@ -16,6 +17,7 @@ const ProjectSchema = new Schema<IProject>(
     description: { type: String, required: true },
     tags: { type: [String], default: [] },
     link: { type: String, default: '#' },
+    prototypeUrl: { type: String, default: '#' },
     order: { type: Number, default: 0 },
     imageUrl: { type: String, default: '' },
     category: { type: String, enum: ['fullstack', 'uiux'], default: 'fullstack' },
