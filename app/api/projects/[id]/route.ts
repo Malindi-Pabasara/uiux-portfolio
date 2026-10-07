@@ -14,7 +14,12 @@ export async function PUT(req: Request, { params }: Params) {
     await dbConnect();
     const { id } = await params;
     const body = await req.json();
-    const project = await Project.findByIdAndUpdate(id, body, { new: true, runValidators: true }).lean();
+
+    // Whitelist accepted fields
+    const allowed = ['title', 'description', 'tags', 'caseStudyUrl', 'prototypeUrl', 'order', 'imageUrl', 'category'];
+    const update = Object.fromEntries(Object.entries(body).filter(([k]) => allowed.includes(k)));
+
+    const project = await Project.findByIdAndUpdate(id, update, { new: true, runValidators: true }).lean();
     if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(project);
   } catch {

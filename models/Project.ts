@@ -4,7 +4,7 @@ export interface IProject extends Document {
   title: string;
   description: string;
   tags: string[];
-  link: string;
+  caseStudyUrl: string;
   prototypeUrl: string;
   order: number;
   imageUrl: string;
@@ -16,7 +16,7 @@ const ProjectSchema = new Schema<IProject>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     tags: { type: [String], default: [] },
-    link: { type: String, default: '#' },
+    caseStudyUrl: { type: String, default: '#' },
     prototypeUrl: { type: String, default: '#' },
     order: { type: Number, default: 0 },
     imageUrl: { type: String, default: '' },

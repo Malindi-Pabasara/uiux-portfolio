@@ -7,13 +7,14 @@ interface Project {
   title: string;
   description: string;
   tags: string[];
-  link: string;
+  caseStudyUrl: string;
+  prototypeUrl: string;
   order: number;
   imageUrl: string;
   category?: 'fullstack' | 'uiux';
 }
 
-const DEFAULT: Project = { title: '', description: '', tags: [], link: '', order: 0, imageUrl: '', category: 'fullstack' };
+const DEFAULT: Project = { title: '', description: '', tags: [], caseStudyUrl: '', prototypeUrl: '', order: 0, imageUrl: '', category: 'uiux' };
 
 async function uploadFile(file: File, folder: string): Promise<string> {
   const fd = new FormData();
@@ -203,8 +204,19 @@ export default function AdminProjects() {
                 placeholder="HTML, CSS, React"
               />
 
-              <label>Link (URL)</label>
-              <input value={editing.link} onChange={e => setEditing({ ...editing, link: e.target.value })} placeholder="https://github.com/..." />
+              <label>Case Study URL</label>
+              <input
+                value={editing.caseStudyUrl}
+                onChange={e => setEditing({ ...editing, caseStudyUrl: e.target.value })}
+                placeholder="https://behance.net/your-case-study"
+              />
+
+              <label>Prototype URL</label>
+              <input
+                value={editing.prototypeUrl}
+                onChange={e => setEditing({ ...editing, prototypeUrl: e.target.value })}
+                placeholder="https://figma.com/proto/..."
+              />
 
               <label>Order (Display priority)</label>
               <input type="number" value={editing.order} onChange={e => setEditing({ ...editing, order: parseInt(e.target.value) || 0 })} />

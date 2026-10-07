@@ -8,7 +8,7 @@ interface Project {
   title: string;
   description: string;
   tags: string[];
-  link?: string;
+  caseStudyUrl?: string;
   prototypeUrl?: string;
   imageUrl?: string;
 }
@@ -74,7 +74,7 @@ export default function Projects() {
       title: 'Optical Service System',
       description: 'A user-friendly interface to manage customers, appointments and optical service records end to end.',
       tags: ['Figma', 'Wireframing', 'UI Design', 'Prototyping'],
-      link: '#',
+      caseStudyUrl: '#',
       prototypeUrl: '#',
     },
     {
@@ -82,7 +82,7 @@ export default function Projects() {
       title: 'Hospital System',
       description: 'A system to manage patient information, appointments and hospital records for clinical staff.',
       tags: ['Figma', 'User Flow', 'Responsive Design'],
-      link: '#',
+      caseStudyUrl: '#',
       prototypeUrl: '#',
     },
     {
@@ -90,7 +90,7 @@ export default function Projects() {
       title: 'Tea Shop Management',
       description: 'A web-based system to manage products, orders and customer information for a small retail shop.',
       tags: ['Wireframing', 'Canva', 'UI Design'],
-      link: '#',
+      caseStudyUrl: '#',
       prototypeUrl: '#',
     },
   ];
@@ -224,9 +224,9 @@ export default function Projects() {
                     {/* Action buttons */}
                     <div className="proj-case-actions">
                       <a
-                        href={proj.link && proj.link !== '#' ? proj.link : undefined}
-                        className={`proj-case-btn-primary${!proj.link || proj.link === '#' ? ' proj-case-btn-disabled' : ''}`}
-                        {...(proj.link && proj.link !== '#'
+                        href={proj.caseStudyUrl && proj.caseStudyUrl !== '#' ? proj.caseStudyUrl : undefined}
+                        className={`proj-case-btn-primary${!proj.caseStudyUrl || proj.caseStudyUrl === '#' ? ' proj-case-btn-disabled' : ''}`}
+                        {...(proj.caseStudyUrl && proj.caseStudyUrl !== '#'
                           ? { target: '_blank', rel: 'noopener noreferrer' }
                           : { 'aria-disabled': 'true' })}
                       >
