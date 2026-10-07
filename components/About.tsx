@@ -10,9 +10,7 @@ export default function About() {
           <RevealWrapper>
             <div className="about-panel" style={{ height: '100%' }}>
               <p>
-                An ambitious IT professional with technical expertise backed by an HNDIT from SLIATE
-                and diplomas in IT and English — grounded in the same care for structure and detail
-                that carries into every system I build.
+                An ambitious IT professional and HNDIT student with a strong passion for UI/UX design. I combine a solid foundation in technology with a creative eye, focusing on creating simple, user-friendly digital experiences that solve real-world problems.
               </p>
             </div>
           </RevealWrapper>
@@ -23,8 +21,8 @@ export default function About() {
                   <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <b>Data integrity</b>
-                  <span>Managed confidential records and digital documentation at Vasana Valuation Associates.</span>
+                  <b>User-Centered Design</b>
+                  <span>Creating simple, intuitive, and engaging digital experiences tailored for users.</span>
                 </div>
               </div>
               <div className="fi">
@@ -32,8 +30,8 @@ export default function About() {
                   <path d="M4 4v16h16M8 16l3-4 3 3 4-6" />
                 </svg>
                 <div>
-                  <b>Full-stack range</b>
-                  <span>Comfortable end to end — from database schema to the interface users touch.</span>
+                  <b>Visual Interface Design</b>
+                  <span>Skilled in wireframing, prototyping, user flows, and high-fidelity mockups in Figma.</span>
                 </div>
               </div>
               <div className="fi">
@@ -41,8 +39,8 @@ export default function About() {
                   <path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z" />
                 </svg>
                 <div>
-                  <b>Grounded in fundamentals</b>
-                  <span>OOP, DBMS and Systems Analysis form the core of an HNDIT in progress.</span>
+                  <b>Design Fundamentals</b>
+                  <span>Applying strong typography, layout principles, and usability heuristics to every project.</span>
                 </div>
               </div>
             </div>

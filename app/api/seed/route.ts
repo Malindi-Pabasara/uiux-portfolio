@@ -29,14 +29,14 @@ export async function POST(req: Request) {
   await Profile.deleteMany({});
   await Profile.create({
     name: 'Malindi Pabasara',
-    title: 'Full-Stack Developer',
-    tagline: 'Building full‑stack systems that work.',
-    bio: 'IT professional and HNDIT candidate specialising in full-stack web and mobile development — Java, JavaScript, PHP and Flutter, from database to interface.',
+    title: 'UI/UX Designer / HNDIT Candidate',
+    tagline: 'Creating simple, user-friendly digital experiences.',
+    bio: 'HNDIT student with a strong interest in UI/UX design and creating simple, user-friendly digital experiences. Skilled in Figma, wireframing, prototyping, user flows, and visual interface design. Looking for a UI/UX internship to develop practical design skills and contribute to real-world digital products.',
     available: true,
     stats: [
-      { label: 'systems built', value: 3, suffix: '' },
+      { label: 'projects designed', value: 3, suffix: '' },
       { label: 'certifications', value: 3, suffix: '' },
-      { label: 'tools & languages', value: 10, suffix: '+' },
+      { label: 'tools & skills', value: 15, suffix: '+' },
     ],
     email: 'malindi.wpm@gmail.com',
     phone: '+94742106298',
@@ -50,11 +50,11 @@ export async function POST(req: Request) {
   await Experience.create({
     title: 'Data Entry Operator',
     company: 'Vasana Valuation Associates',
-    period: '',
+    period: 'Sep 2023 - Aug 2024',
     bullets: [
-      'Managed day-to-day data entry with a focus on accuracy and consistency.',
-      "Maintained confidential records in line with the firm's data-handling standards.",
-      'Handled digital documentation, keeping files organised and easy to retrieve.',
+      'Verifying information for accuracy and completeness.',
+      'Organizing documents and maintaining structured filing systems.',
+      'Maintaining digital and physical records for the organization.',
     ],
     order: 0,
   });
@@ -62,9 +62,9 @@ export async function POST(req: Request) {
   // Skills
   await Skill.deleteMany({});
   await Skill.insertMany([
-    { category: 'Frontend & UI/UX', items: ['HTML', 'CSS', 'JavaScript', 'Figma'], order: 0 },
-    { category: 'Backend & Mobile', items: ['Java', 'PHP', 'Node.js', 'Flutter', 'Dart', 'Kotlin'], order: 1 },
-    { category: 'Database & Tools', items: ['MySQL', 'Postman', 'Git', 'GitHub'], order: 2 },
+    { category: 'Design Tools', items: ['Figma', 'Canva'], order: 0 },
+    { category: 'UI/UX Skills', items: ['Wireframing', 'Prototyping', 'User Flow', 'UI Design', 'Responsive Design', 'Typography', 'Color & Layout'], order: 1 },
+    { category: 'Research & Frontend', items: ['Basic User Research', 'User Personas', 'Usability Principles', 'Design Thinking', 'HTML', 'CSS', 'JavaScript'], order: 2 },
   ]);
 
   // Projects
@@ -96,17 +96,18 @@ export async function POST(req: Request) {
   // Certifications
   await Certification.deleteMany({});
   await Certification.insertMany([
-    { title: 'Certificate in Web Design & Python', issuer: 'University of Moratuwa', year: '2026', order: 0 },
-    { title: 'Certificate in Information Technology', issuer: 'Open University of Sri Lanka', year: '2023', order: 1 },
+    { title: 'Certificate in Web Design & Python', issuer: 'University of Moratuwa', year: '', order: 0 },
+    { title: 'Certificate in Information Technology', issuer: 'Open University', year: '', order: 1 },
+    { title: 'Certificate in English', issuer: 'Sabaragamuwa University', year: '', order: 2 },
   ]);
 
   // Education
   await Education.deleteMany({});
   await Education.create({
     degree: 'Higher National Diploma in Information Technology (HNDIT)',
-    institution: 'ATI Ratnapura — SLIATE',
-    period: '2024–2026',
-    details: 'Core focus: OOP, DBMS, Systems Analysis, IT Infrastructure.',
+    institution: 'Advanced Technological Institute, Ratnapura',
+    period: 'Expected 2026',
+    details: 'Focus on technology foundations, software engineering, and systems design.',
     active: true,
     order: 0,
   });

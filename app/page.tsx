@@ -77,8 +77,8 @@ export default function HomePage() {
 
       <Hero
         name={p?.name || 'Malindi Pabasara'}
-        tagline={p?.tagline || 'Building full‑stack systems that work.'}
-        bio={p?.bio || 'IT professional and HNDIT candidate specialising in full-stack web and mobile development.'}
+        tagline={p?.tagline || 'Creating simple, user-friendly digital experiences.'}
+        bio={p?.bio || 'HNDIT student with a strong interest in UI/UX design. Skilled in Figma, wireframing, prototyping, user flows, and visual interface design.'}
         available={p?.available ?? true}
         stats={p?.stats || []}
         cvUrl={p?.cvUrl || ''}
