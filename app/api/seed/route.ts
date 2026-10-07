@@ -62,9 +62,9 @@ export async function POST(req: Request) {
   // Skills
   await Skill.deleteMany({});
   await Skill.insertMany([
-    { category: 'Design Tools', items: ['Figma', 'Canva'], order: 0 },
-    { category: 'UI/UX Skills', items: ['Wireframing', 'Prototyping', 'User Flow', 'UI Design', 'Responsive Design', 'Typography', 'Color & Layout'], order: 1 },
-    { category: 'Research & Frontend', items: ['Basic User Research', 'User Personas', 'Usability Principles', 'Design Thinking', 'HTML', 'CSS', 'JavaScript'], order: 2 },
+    { category: 'Design', items: ['Figma', 'Canva', 'Wireframing', 'Prototyping', 'User Flow', 'UI Design', 'Responsive Design', 'Typography', 'Color & Layout'], order: 0 },
+    { category: 'UX', items: ['Basic User Research', 'User Personas', 'Usability Principles', 'Design Thinking'], order: 1 },
+    { category: 'Technical', items: ['HTML', 'CSS', 'JavaScript', 'Basic Git/GitHub'], order: 2 },
   ]);
 
   // Projects
