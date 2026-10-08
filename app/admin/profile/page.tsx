@@ -299,6 +299,7 @@ export default function AdminProfile() {
     setMsg(null);
     try {
       const url = await uploadFile(file, 'portfolio/cv');
+      // Delete old file from Cloudinary if one exists
       if (form.fullstackCvUrl) {
         await fetch('/api/upload', {
           method: 'DELETE',
@@ -306,11 +307,12 @@ export default function AdminProfile() {
           body: JSON.stringify({ url: form.fullstackCvUrl }),
         }).catch(() => {});
       }
-      const payload = { ...form, fullstackCvUrl: url };
+      // Send only the field being changed — avoids stale-closure issues with the
+      // full form spread, and is safe because the PUT route uses $set.
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ fullstackCvUrl: url }),
       });
       if (!res.ok) throw new Error('Failed to update profile database');
       set('fullstackCvUrl', url);
@@ -335,11 +337,10 @@ export default function AdminProfile() {
           body: JSON.stringify({ url: form.fullstackCvUrl }),
         });
       }
-      const payload = { ...form, fullstackCvUrl: '' };
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ fullstackCvUrl: '' }),
       });
       if (!res.ok) throw new Error('Failed to update profile');
       set('fullstackCvUrl', '');
@@ -359,6 +360,7 @@ export default function AdminProfile() {
     setMsg(null);
     try {
       const url = await uploadFile(file, 'portfolio/cv');
+      // Delete old file from Cloudinary if one exists
       if (form.uiuxCvUrl) {
         await fetch('/api/upload', {
           method: 'DELETE',
@@ -366,11 +368,12 @@ export default function AdminProfile() {
           body: JSON.stringify({ url: form.uiuxCvUrl }),
         }).catch(() => {});
       }
-      const payload = { ...form, uiuxCvUrl: url };
+      // Send only the field being changed — avoids stale-closure issues with the
+      // full form spread, and is safe because the PUT route uses $set.
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ uiuxCvUrl: url }),
       });
       if (!res.ok) throw new Error('Failed to update profile database');
       set('uiuxCvUrl', url);
@@ -395,11 +398,10 @@ export default function AdminProfile() {
           body: JSON.stringify({ url: form.uiuxCvUrl }),
         });
       }
-      const payload = { ...form, uiuxCvUrl: '' };
       const res = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ uiuxCvUrl: '' }),
       });
       if (!res.ok) throw new Error('Failed to update profile');
       set('uiuxCvUrl', '');

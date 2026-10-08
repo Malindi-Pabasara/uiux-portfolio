@@ -33,9 +33,11 @@ const RAW_MIME_PREFIXES = [
 ];
 
 function resolveResourceType(mimeType: string): 'image' | 'video' | 'raw' | 'auto' {
-  if (mimeType === 'application/pdf') return 'image'; // Force PDF as image for inline viewing
   if (mimeType.startsWith('image/')) return 'image';
   if (mimeType.startsWith('video/')) return 'video';
+  // PDFs and all other document types must use 'raw' — Cloudinary rejects
+  // them when resource_type is 'image', which causes the upload to fail and
+  // the UI button to get stuck on "Uploading…".
   if (RAW_MIME_PREFIXES.includes(mimeType)) return 'raw';
   return 'auto';
 }
