@@ -42,7 +42,8 @@ export async function POST(req: Request) {
     phone: '+94742106298',
     linkedin: 'https://linkedin.com/in/Malindi-Pabasara',
     github: 'https://github.com/Malindi-Pabasara',
-    cvUrl: '#',
+    fullstackCvUrl: '',
+    uiuxCvUrl: '',
   });
 
   // Experience
