@@ -81,7 +81,7 @@ export default function HomePage() {
         bio={p?.bio || 'HNDIT student with a strong interest in UI/UX design. Skilled in Figma, wireframing, prototyping, user flows, and visual interface design.'}
         available={p?.available ?? true}
         stats={p?.stats || []}
-        cvUrl={p?.cvUrl || ''}
+        uiuxCvUrl={p?.uiuxCvUrl || ''}
         avatarUrl={p?.avatarUrl || p?.profilePicture || ''}
       />
 

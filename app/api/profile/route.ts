@@ -43,7 +43,8 @@ export async function PUT(req: Request) {
     if (safeBody.phone      !== undefined) update.phone      = String(safeBody.phone ?? '');
     if (safeBody.linkedin   !== undefined) update.linkedin   = String(safeBody.linkedin ?? '');
     if (safeBody.github     !== undefined) update.github     = String(safeBody.github ?? '');
-    if (safeBody.cvUrl      !== undefined) update.cvUrl      = String(safeBody.cvUrl ?? '');
+    if (safeBody.fullstackCvUrl !== undefined) update.fullstackCvUrl = String(safeBody.fullstackCvUrl ?? '');
+    if (safeBody.uiuxCvUrl      !== undefined) update.uiuxCvUrl      = String(safeBody.uiuxCvUrl ?? '');
     if (safeBody.avatarUrl  !== undefined) update.avatarUrl  = String(safeBody.avatarUrl ?? '');
 
     // Use $set so Mongoose patches only the provided fields without replacing the doc.

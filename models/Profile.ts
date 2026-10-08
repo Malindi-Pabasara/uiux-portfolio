@@ -17,7 +17,8 @@ export interface IProfile extends Document {
   phone: string;
   linkedin: string;
   github: string;
-  cvUrl: string;
+  fullstackCvUrl: string;
+  uiuxCvUrl: string;
   avatarUrl: string;
 }
 
@@ -39,7 +40,8 @@ const ProfileSchema = new Schema<IProfile>(
     phone: { type: String, default: '' },
     linkedin: { type: String, default: '' },
     github: { type: String, default: '' },
-    cvUrl: { type: String, default: '' },
+    fullstackCvUrl: { type: String, default: '' },
+    uiuxCvUrl: { type: String, default: '' },
     avatarUrl: { type: String, default: '' },
   },
   { timestamps: true }

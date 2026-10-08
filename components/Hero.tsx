@@ -12,11 +12,11 @@ interface HeroProps {
   bio: string;
   available: boolean;
   stats: Stat[];
-  cvUrl?: string;
+  uiuxCvUrl?: string;
   avatarUrl?: string;
 }
 
-export default function Hero({ name, tagline, bio, available, stats, cvUrl, avatarUrl }: HeroProps) {
+export default function Hero({ name, tagline, bio, available, stats, uiuxCvUrl, avatarUrl }: HeroProps) {
   const heroRef = useRef<HTMLElement>(null);
   // ref for the orbiting dot
   const orbitDotRef = useRef<HTMLDivElement>(null);
@@ -113,9 +113,9 @@ export default function Hero({ name, tagline, bio, available, stats, cvUrl, avat
 
           <div className="flex flex-wrap gap-4 mb-10 fade-in d3">
             <a href="#projects" className="btn btn-primary">Explore projects</a>
-            {cvUrl && cvUrl !== '#' && (
+            {uiuxCvUrl && (
               <a
-                href={cvUrl}
+                href={uiuxCvUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-ghost"
