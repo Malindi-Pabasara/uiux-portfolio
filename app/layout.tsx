@@ -4,13 +4,13 @@ import { SessionProvider } from './providers';
 import CustomCursor from '@/components/CustomCursor';
 
 export const metadata: Metadata = {
-  title: 'Malindi Pabasara — Full-Stack Developer',
+  title: 'Malindi Pabasara — UI/UX Designer',
   description:
-    'IT professional and HNDIT candidate specialising in full-stack web and mobile development — Java, JavaScript, PHP and Flutter.',
-  keywords: ['Malindi Pabasara', 'Full-Stack Developer', 'Portfolio', 'Java', 'Flutter', 'PHP'],
+    'HNDIT candidate specialising in UI/UX design — Figma, wireframing, prototyping, user flows, and visual interface design.',
+  keywords: ['Malindi Pabasara', 'UI/UX Designer', 'Portfolio', 'Figma', 'Wireframing', 'Prototyping'],
   openGraph: {
-    title: 'Malindi Pabasara — Full-Stack Developer',
-    description: 'Building full-stack systems that work.',
+    title: 'Malindi Pabasara — UI/UX Designer',
+    description: 'Crafting simple, user-friendly digital experiences.',
     type: 'website',
   },
 };
