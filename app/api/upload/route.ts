@@ -6,19 +6,19 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
 /**
  * POST /api/upload
  * Accepts multipart/form-data with:
- *   - file        : the file to upload
- *   - folder      : (optional) Cloudinary folder, defaults to 'portfolio'
+ *   - file   : the file to upload
+ *   - folder : (optional) Cloudinary folder, defaults to 'portfolio'
  *
  * Admin-only. Returns { url: string }.
  *
  * resource_type mapping:
- *   image/*                    → 'image'
- *   video/*                    → 'video'
- *   application/pdf, zip, doc* → 'raw'  (avoids "invalid file type" errors)
- *   everything else            → 'auto' (Cloudinary auto-detect fallback)
+ *   image/*     → 'image'
+ *   video/*     → 'video'
+ *   application/pdf, zip, doc*, etc. → 'raw'
+ *   everything else → 'auto'
  */
 
-const RAW_MIME_PREFIXES = [
+const RAW_MIME_TYPES = new Set([
   'application/pdf',
   'application/zip',
   'application/x-zip-compressed',
@@ -30,15 +30,15 @@ const RAW_MIME_PREFIXES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain',
   'text/csv',
-];
+]);
 
 function resolveResourceType(mimeType: string): 'image' | 'video' | 'raw' | 'auto' {
   if (mimeType.startsWith('image/')) return 'image';
   if (mimeType.startsWith('video/')) return 'video';
-  // PDFs and all other document types must use 'raw' — Cloudinary rejects
-  // them when resource_type is 'image', which causes the upload to fail and
-  // the UI button to get stuck on "Uploading…".
-  if (RAW_MIME_PREFIXES.includes(mimeType)) return 'raw';
+  // PDFs and all document types must use 'raw'. Cloudinary rejects PDFs
+  // uploaded as 'image', which causes the upload to fail and the UI button
+  // to get stuck on "Uploading…".
+  if (RAW_MIME_TYPES.has(mimeType)) return 'raw';
   return 'auto';
 }
 
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user?.role !== 'admin') {
+      console.error('[upload POST] Unauthorized — session:', JSON.stringify(session?.user));
       return NextResponse.json({ message: 'Access denied. Admins only.' }, { status: 403 });
     }
 
@@ -65,25 +66,29 @@ export async function POST(req: Request) {
     const mimeType = file.type || 'application/octet-stream';
     const resourceType = resolveResourceType(mimeType);
 
+    console.log(`[upload POST] file="${file.name}" mime="${mimeType}" resource_type="${resourceType}" folder="${folder}"`);
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    
-    // Extract original filename without extension (for image/video) or with extension (for raw)
-    const originalName = file.name || 'upload';
-    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, "");
-    const publicId = resourceType === 'raw' ? originalName : nameWithoutExt;
 
+    // Do NOT set a fixed public_id — let Cloudinary generate a unique one.
+    // A fixed public_id with unique_filename:false causes conflicts when the
+    // same filename is re-uploaded and can make the upload silently fail.
     const url = await uploadToCloudinary(buffer, folder, {
       resource_type: resourceType,
-      public_id: publicId,
-      use_filename: true,
-      unique_filename: false,
+      // unique_filename defaults to true — Cloudinary appends a random suffix
+      // so concurrent or repeated uploads of the same file never conflict.
     });
 
+    console.log(`[upload POST] success url="${url}"`);
     return NextResponse.json({ url, resource_type: resourceType }, { status: 200 });
+
   } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ message: 'Upload failed. Please try again.' }, { status: 500 });
+    console.error('[upload POST] error:', error);
+    return NextResponse.json(
+      { message: `Upload failed: ${error instanceof Error ? error.message : String(error)}` },
+      { status: 500 }
+    );
   }
 }
 
@@ -99,28 +104,29 @@ export async function DELETE(req: Request) {
 
     const parts = url.split('/');
     const uploadIndex = parts.indexOf('upload');
-    if (uploadIndex === -1) return NextResponse.json({ message: 'Invalid URL' }, { status: 400 });
+    if (uploadIndex === -1) return NextResponse.json({ message: 'Invalid Cloudinary URL' }, { status: 400 });
 
     const resourceType = parts[uploadIndex - 1] as 'image' | 'video' | 'raw';
-    
+
     let afterUpload = parts.slice(uploadIndex + 1);
-    // Cloudinary URLs may or may not include a version segment (e.g., /v1234567890/)
+    // Strip version segment (e.g. /v1234567890/)
     if (afterUpload[0] && /^v\d+$/.test(afterUpload[0])) {
       afterUpload = afterUpload.slice(1);
     }
-    let publicIdWithExtension = afterUpload.join('/');
-    
-    // For images, we must strip the extension for destroy() to work
-    let publicId = publicIdWithExtension;
+    let publicId = afterUpload.join('/');
+
+    // For image/video, Cloudinary destroy() requires the public_id WITHOUT extension
     if (resourceType === 'image' || resourceType === 'video') {
-      publicId = publicId.replace(/\.[^/.]+$/, ""); 
+      publicId = publicId.replace(/\.[^/.]+$/, '');
     }
 
+    console.log(`[upload DELETE] publicId="${publicId}" resource_type="${resourceType}"`);
     const { deleteFromCloudinary } = await import('@/lib/cloudinary');
     await deleteFromCloudinary(publicId, resourceType);
     return NextResponse.json({ message: 'Deleted successfully' }, { status: 200 });
+
   } catch (error) {
-    console.error('Delete error:', error);
+    console.error('[upload DELETE] error:', error);
     return NextResponse.json({ message: 'Failed to delete file' }, { status: 500 });
   }
 }

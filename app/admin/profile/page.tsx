@@ -24,14 +24,32 @@ const DEFAULT: ProfileData = {
 
 /* ─── helpers ─────────────────────────────────────────────── */
 async function uploadFile(file: File, folder: string): Promise<string> {
+  console.log('[uploadFile] starting upload:', file.name, file.type, file.size, 'folder:', folder);
   const fd = new FormData();
   fd.append('file', file);
   fd.append('folder', folder);
+
   const res = await fetch('/api/upload', { method: 'POST', body: fd });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message ?? 'Upload failed');
+
+  // Always read the body — even on error — so we can log the exact message.
+  const text = await res.text();
+  console.log('[uploadFile] response status:', res.status, '| body:', text);
+
+  if (!res.ok) {
+    let msg = `Upload failed (HTTP ${res.status})`;
+    try {
+      const data = JSON.parse(text);
+      msg = data.message ?? data.error ?? msg;
+    } catch { /* body wasn't JSON */ }
+    throw new Error(msg);
+  }
+
+  const data = JSON.parse(text);
+  if (!data.url) throw new Error('Cloudinary returned no URL');
+  console.log('[uploadFile] success, url:', data.url);
   return data.url as string;
 }
+
 
 function fileName(url: string) {
   try { return decodeURIComponent(new URL(url).pathname.split('/').pop() ?? url); }

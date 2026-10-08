@@ -9,49 +9,48 @@ cloudinary.config({
 /**
  * Uploads a file buffer to Cloudinary and returns the secure URL.
  *
- * @param buffer       - Raw file bytes
- * @param folder       - Cloudinary folder to organise uploads (e.g. 'portfolio/cv')
- * @param options      - Extra Cloudinary upload options (e.g. resource_type)
+ * IMPORTANT: Uses cloudinary.uploader.upload() with a base64 data URI instead
+ * of upload_stream(). upload_stream() silently hangs in Next.js App Router
+ * serverless functions because the underlying Node.js writable stream stalls
+ * and the callback never fires — leaving the UI button stuck on "Uploading…"
+ * indefinitely with no error surfaced.
  *
- * Supported resource_type values:
- *   'image' - JPG, PNG, GIF, WebP, SVG, etc.
- *   'video' - MP4, MOV, etc.
- *   'raw'   - PDF, ZIP, DOC, DOCX, XLSX, CSV, TXT, and all other binary files
- *   'auto'  - Cloudinary auto-detects (may fail for non-image types on some plans)
- *
- * Always pass resource_type explicitly to avoid "invalid file type" errors.
+ * @param buffer   - Raw file bytes
+ * @param folder   - Cloudinary folder (e.g. 'portfolio/cv')
+ * @param options  - Extra Cloudinary upload options (e.g. resource_type, public_id)
  */
 export async function uploadToCloudinary(
   buffer: Buffer,
   folder: string,
   options: UploadApiOptions = {}
 ): Promise<string> {
-  // Default to 'auto' only when the caller has not specified a resource_type
   const uploadOptions: UploadApiOptions = {
     folder,
-    resource_type: 'auto',
-    ...options, // caller-supplied resource_type overrides the default above
+    resource_type: 'auto', // overridden by options below if caller specifies one
+    ...options,
   };
 
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(uploadOptions, (error, result) => {
-        if (error || !result) {
-          return reject(error ?? new Error('Cloudinary upload failed'));
-        }
-        resolve(result.secure_url);
-      })
-      .end(buffer);
-  });
+  // Build a base64 data URI. Cloudinary accepts this directly without streaming.
+  // The MIME prefix must be syntactically valid; Cloudinary ignores it for 'raw'.
+  const mimeType =
+    options.resource_type === 'raw'   ? 'application/octet-stream' :
+    options.resource_type === 'video' ? 'video/mp4'                :
+                                        'image/jpeg';
+
+  const dataUri = `data:${mimeType};base64,${buffer.toString('base64')}`;
+
+  console.log('[cloudinary] uploading to folder:', folder, '| resource_type:', uploadOptions.resource_type);
+  const result = await cloudinary.uploader.upload(dataUri, uploadOptions);
+  console.log('[cloudinary] upload success, url:', result.secure_url);
+  return result.secure_url;
 }
 
-export async function deleteFromCloudinary(publicId: string, resourceType: 'image' | 'video' | 'raw' = 'image'): Promise<void> {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.destroy(publicId, { resource_type: resourceType }, (error, result) => {
-      if (error) return reject(error);
-      resolve(result);
-    });
-  });
+export async function deleteFromCloudinary(
+  publicId: string,
+  resourceType: 'image' | 'video' | 'raw' = 'image'
+): Promise<void> {
+  console.log('[cloudinary] deleting:', publicId, '| resource_type:', resourceType);
+  await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
 }
 
 export default cloudinary;
