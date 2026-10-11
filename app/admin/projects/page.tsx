@@ -14,7 +14,7 @@ interface Project {
   category?: 'fullstack' | 'uiux';
 }
 
-const DEFAULT: Project = { title: '', description: '', tags: [], caseStudyUrl: '', prototypeUrl: '', order: 0, imageUrl: '', category: 'uiux' };
+const DEFAULT: Project = { title: '', description: '', tags: [], caseStudyUrl: '', prototypeUrl: '', order: 0, imageUrl: '', category: 'fullstack' };
 
 async function uploadFile(file: File, folder: string): Promise<string> {
   const fd = new FormData();
@@ -34,6 +34,7 @@ export default function AdminProjects() {
   const [loading, setLoading] = useState(true);
   const [imgUploading, setImgUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState('');
+  const [activeTab, setActiveTab] = useState<'fullstack' | 'uiux'>('fullstack');
   const imgRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = async () => {
@@ -44,6 +45,20 @@ export default function AdminProjects() {
   };
 
   useEffect(() => { fetchItems(); }, []);
+
+  // Strict category helpers to ensure zero crossover
+  const isFullstack = (c?: string) => c === 'fullstack' || c === 'Full-Stack';
+  const isUiUx = (c?: string) => c === 'uiux' || c === 'UI/UX';
+
+  const fullstackCount = items.filter(i => isFullstack(i.category)).length;
+  const uiuxCount = items.filter(i => isUiUx(i.category)).length;
+
+  const filteredItems = items.filter(item => {
+    if (activeTab === 'fullstack') {
+      return isFullstack(item.category);
+    }
+    return isUiUx(item.category);
+  });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,10 +89,14 @@ export default function AdminProjects() {
     if (!editing) return;
     const method = editing._id ? 'PUT' : 'POST';
     const url = editing._id ? `/api/projects/${editing._id}` : '/api/projects';
+    const payload = {
+      ...editing,
+      category: editing.category || activeTab,
+    };
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editing),
+      body: JSON.stringify(payload),
     });
     if (res.ok) { setEditing(null); fetchItems(); }
     else alert('Failed to save project');
@@ -92,12 +111,105 @@ export default function AdminProjects() {
 
   return (
     <div>
-      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1>Projects</h1>
           <p style={{ color: 'var(--muted)', marginTop: 6 }}>Manage your featured work</p>
         </div>
-        <button className="btn btn-primary" onClick={() => { setEditing({ ...DEFAULT }); setUploadMsg(''); }}>+ Add Project</button>
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            setEditing({ ...DEFAULT, category: activeTab });
+            setUploadMsg('');
+          }}
+        >
+          + Add {activeTab === 'uiux' ? 'UI/UX' : 'Full-Stack'} Project
+        </button>
+      </div>
+
+      {/* Modern Top Tab/Toggle Menu */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: 4,
+          borderRadius: 14,
+          background: 'var(--panel-2)',
+          border: '1px solid var(--border)',
+          gap: 6,
+        }}>
+          <button
+            type="button"
+            id="tab-projects-fullstack"
+            onClick={() => setActiveTab('fullstack')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 18px',
+              borderRadius: 10,
+              fontSize: '.88rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: 'none',
+              transition: 'all .2s ease',
+              background: activeTab === 'fullstack'
+                ? 'linear-gradient(100deg, var(--purple), var(--purple-deep))'
+                : 'transparent',
+              color: activeTab === 'fullstack' ? '#fff' : 'var(--muted)',
+              boxShadow: activeTab === 'fullstack' ? '0 4px 14px rgba(157,107,255,.3)' : 'none',
+            }}
+          >
+            <span>💻</span>
+            <span>Full-Stack</span>
+            <span style={{
+              fontSize: '.72rem',
+              fontWeight: 700,
+              padding: '1px 7px',
+              borderRadius: 99,
+              background: activeTab === 'fullstack' ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.06)',
+              color: activeTab === 'fullstack' ? '#fff' : 'var(--muted)',
+            }}>
+              {fullstackCount}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            id="tab-projects-uiux"
+            onClick={() => setActiveTab('uiux')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 18px',
+              borderRadius: 10,
+              fontSize: '.88rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: 'none',
+              transition: 'all .2s ease',
+              background: activeTab === 'uiux'
+                ? 'linear-gradient(100deg, var(--purple), var(--purple-deep))'
+                : 'transparent',
+              color: activeTab === 'uiux' ? '#fff' : 'var(--muted)',
+              boxShadow: activeTab === 'uiux' ? '0 4px 14px rgba(157,107,255,.3)' : 'none',
+            }}
+          >
+            <span>🎨</span>
+            <span>UI/UX</span>
+            <span style={{
+              fontSize: '.72rem',
+              fontWeight: 700,
+              padding: '1px 7px',
+              borderRadius: 99,
+              background: activeTab === 'uiux' ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.06)',
+              color: activeTab === 'uiux' ? '#fff' : 'var(--muted)',
+            }}>
+              {uiuxCount}
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="admin-card" style={{ padding: 0, overflowX: 'auto' }}>
@@ -115,10 +227,19 @@ export default function AdminProjects() {
           <tbody>
             {loading ? (
               <tr><td colSpan={6} style={{ textAlign: 'center', padding: 24, color: 'var(--muted)' }}>Loading...</td></tr>
-            ) : items.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 24, color: 'var(--muted)' }}>No projects found.</td></tr>
+            ) : filteredItems.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: 32, color: 'var(--muted)' }}>
+                  <p style={{ margin: 0, fontSize: '.95rem' }}>
+                    No {activeTab === 'uiux' ? 'UI/UX' : 'Full-Stack'} projects found.
+                  </p>
+                  <p style={{ margin: '6px 0 0', fontSize: '.8rem', color: 'var(--muted-2)' }}>
+                    Click &ldquo;+ Add {activeTab === 'uiux' ? 'UI/UX' : 'Full-Stack'} Project&rdquo; to create your first project in this category.
+                  </p>
+                </td>
+              </tr>
             ) : (
-              items.map((item) => (
+              filteredItems.map((item) => (
                 <tr key={item._id}>
                   <td style={{ width: 60 }}>{item.order}</td>
                   <td style={{ width: 56 }}>
@@ -154,7 +275,7 @@ export default function AdminProjects() {
       {editing && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>{editing._id ? 'Edit Project' : 'Add Project'}</h2>
+            <h2>{editing._id ? `Edit ${editing.category === 'uiux' ? 'UI/UX' : 'Full-Stack'} Project` : `Add ${activeTab === 'uiux' ? 'UI/UX' : 'Full-Stack'} Project`}</h2>
             <form onSubmit={handleSave} className="admin-form">
 
               {/* Project Image Upload */}
@@ -184,15 +305,29 @@ export default function AdminProjects() {
               <label>Title</label>
               <input required value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} />
 
+              {/* Category selection locked to activeTab/editing category to prevent accidental crossover */}
               <label>Category</label>
               <select
-                value={editing.category || 'fullstack'}
-                onChange={e => setEditing({ ...editing, category: e.target.value as 'fullstack' | 'uiux' })}
-                style={{ width: '100%', padding: '8px', marginBottom: '16px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--panel)', color: 'inherit' }}
+                disabled
+                value={editing.category || activeTab}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  marginBottom: '6px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--panel-2)',
+                  color: 'var(--muted)',
+                  cursor: 'not-allowed',
+                  opacity: 0.85,
+                }}
               >
                 <option value="fullstack">Full-Stack</option>
                 <option value="uiux">UI/UX</option>
               </select>
+              <p style={{ margin: '0 0 16px', fontSize: '.75rem', color: 'var(--muted)' }}>
+                Category is automatically locked to {activeTab === 'uiux' ? 'UI/UX' : 'Full-Stack'} based on the active tab.
+              </p>
 
               <label>Description</label>
               <textarea required value={editing.description} onChange={e => setEditing({ ...editing, description: e.target.value })} />
