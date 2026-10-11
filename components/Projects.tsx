@@ -11,6 +11,7 @@ interface Project {
   caseStudyUrl?: string;
   prototypeUrl?: string;
   imageUrl?: string;
+  category?: string;
 }
 
 // Gradient palettes cycle per card for visual variety
@@ -20,8 +21,38 @@ const CARD_GRADIENTS = [
   'from-[#6d28d9]/20 via-[#41c7ff]/10 to-[#9d6bff]/15',
 ];
 
+const defaultProjects: Project[] = [
+  {
+    _id: '1',
+    title: 'Optical Service System',
+    description: 'A user-friendly interface to manage customers, appointments and optical service records end to end.',
+    tags: ['Figma', 'Wireframing', 'UI Design', 'Prototyping'],
+    caseStudyUrl: '#',
+    prototypeUrl: '#',
+    category: 'UI/UX',
+  },
+  {
+    _id: '2',
+    title: 'Hospital System',
+    description: 'A system to manage patient information, appointments and hospital records for clinical staff.',
+    tags: ['Figma', 'User Flow', 'Responsive Design'],
+    caseStudyUrl: '#',
+    prototypeUrl: '#',
+    category: 'UI/UX',
+  },
+  {
+    _id: '3',
+    title: 'Tea Shop Management',
+    description: 'A web-based system to manage products, orders and customer information for a small retail shop.',
+    tags: ['Wireframing', 'Canva', 'UI Design'],
+    caseStudyUrl: '#',
+    prototypeUrl: '#',
+    category: 'UI/UX',
+  },
+];
+
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(defaultProjects);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -30,7 +61,9 @@ export default function Projects() {
         const res = await fetch('/api/projects');
         if (res.ok) {
           const data = await res.json();
-          setProjects(data);
+          if (Array.isArray(data) && data.length > 0) {
+            setProjects(data);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch projects', error);
@@ -68,34 +101,7 @@ export default function Projects() {
     };
   }, [isLoading, projects]);
 
-  const defaultProjects: Project[] = [
-    {
-      _id: '1',
-      title: 'Optical Service System',
-      description: 'A user-friendly interface to manage customers, appointments and optical service records end to end.',
-      tags: ['Figma', 'Wireframing', 'UI Design', 'Prototyping'],
-      caseStudyUrl: '#',
-      prototypeUrl: '#',
-    },
-    {
-      _id: '2',
-      title: 'Hospital System',
-      description: 'A system to manage patient information, appointments and hospital records for clinical staff.',
-      tags: ['Figma', 'User Flow', 'Responsive Design'],
-      caseStudyUrl: '#',
-      prototypeUrl: '#',
-    },
-    {
-      _id: '3',
-      title: 'Tea Shop Management',
-      description: 'A web-based system to manage products, orders and customer information for a small retail shop.',
-      tags: ['Wireframing', 'Canva', 'UI Design'],
-      caseStudyUrl: '#',
-      prototypeUrl: '#',
-    },
-  ];
-
-  const displayItems = projects.length > 0 ? projects : defaultProjects;
+  const uiuxProjects = projects.filter(project => project.category === 'UI/UX' || project.category === 'uiux');
 
   // Unique wireframe SVG placeholders per card
   const placeholders = [
@@ -177,7 +183,7 @@ export default function Projects() {
               ))}
             </>
           ) : (
-            displayItems.map((proj, idx) => (
+            uiuxProjects.map((proj, idx) => (
               <RevealWrapper key={proj._id}>
                 <div className="proj-case-card">
 
