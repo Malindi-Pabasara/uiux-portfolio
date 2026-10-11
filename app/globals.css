@@ -278,10 +278,11 @@ section { padding: 70px 0; position: relative; }
 }
 .skill-card .icon svg { width: 20px; height: 20px; }
 .skill-card h3 { margin: 0 0 14px; font-size: 1rem; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
 .chip {
   padding: 6px 12px; border-radius: 7px; background: rgba(255,255,255,.03);
   border: 1px solid var(--border); color: #c9cee6; font-size: .82rem; font-family: 'JetBrains Mono', monospace;
+  word-break: break-word; overflow-wrap: anywhere; white-space: normal;
 }
 
 /* Projects — Premium Case Study Cards */

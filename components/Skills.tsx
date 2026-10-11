@@ -1,9 +1,10 @@
 import RevealWrapper from './RevealWrapper';
 
 interface SkillItem {
-  _id: string;
+  _id?: string;
   category: string;
-  items: string[];
+  items?: string[];
+  skills?: string | string[];
   portfolioType?: 'Full-Stack' | 'UI/UX' | string;
 }
 
@@ -24,6 +25,7 @@ export default function Skills({
   skills?: SkillItem[];
 }) {
   const uiuxSkills = skills.filter((skill) => skill.portfolioType === 'UI/UX');
+  const displaySkills = uiuxSkills.length > 0 ? uiuxSkills : skills;
 
   return (
     <section id="skills">
@@ -31,19 +33,44 @@ export default function Skills({
         <p className="eyebrow">skills</p>
         <h2 className="sec-title">What I work with</h2>
         <div className="grid grid-cols-1 gap-4 w-full">
-          {uiuxSkills.map((skill, idx) => (
-            <RevealWrapper key={skill._id} className="w-full">
-              <div className="skill-card w-full">
-                <div className="icon">{ICONS[idx % ICONS.length]}</div>
-                <h3>{skill.category}</h3>
-                <div className="chips">
-                  {(skill.items || []).map((chip) => (
-                    <span className="chip" key={chip}>{chip}</span>
-                  ))}
+          {displaySkills.map((skill, idx) => {
+            const rawItems: (string | unknown)[] =
+              typeof skill.skills === 'string'
+                ? [skill.skills]
+                : Array.isArray(skill.skills)
+                ? skill.skills
+                : Array.isArray(skill.items)
+                ? skill.items
+                : [];
+
+            const skillChips = rawItems.flatMap((item) =>
+              typeof item === 'string'
+                ? item
+                    .split('/')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : []
+            );
+
+            return (
+              <RevealWrapper key={skill._id || idx} className="w-full min-w-0">
+                <div className="skill-card w-full min-w-0 overflow-hidden">
+                  <div className="icon">{ICONS[idx % ICONS.length]}</div>
+                  <h3 className="break-words whitespace-normal">{skill.category}</h3>
+                  <div className="chips min-w-0 overflow-hidden flex flex-wrap gap-2">
+                    {skillChips.map((chip, chipIdx) => (
+                      <span
+                        key={`${chip}-${chipIdx}`}
+                        className="chip inline-block break-words whitespace-normal max-w-full"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </RevealWrapper>
-          ))}
+              </RevealWrapper>
+            );
+          })}
         </div>
       </div>
     </section>
