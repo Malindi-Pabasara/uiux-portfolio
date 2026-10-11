@@ -19,7 +19,6 @@ import { uploadToCloudinary } from '@/lib/cloudinary';
  */
 
 const RAW_MIME_TYPES = new Set([
-  'application/pdf',
   'application/zip',
   'application/x-zip-compressed',
   'application/x-zip',
@@ -33,11 +32,8 @@ const RAW_MIME_TYPES = new Set([
 ]);
 
 function resolveResourceType(mimeType: string): 'image' | 'video' | 'raw' | 'auto' {
-  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('image/') || mimeType === 'application/pdf') return 'image';
   if (mimeType.startsWith('video/')) return 'video';
-  // PDFs and all document types must use 'raw'. Cloudinary rejects PDFs
-  // uploaded as 'image', which causes the upload to fail and the UI button
-  // to get stuck on "Uploading…".
   if (RAW_MIME_TYPES.has(mimeType)) return 'raw';
   return 'auto';
 }
@@ -53,6 +49,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const folder = (formData.get('folder') as string | null) ?? 'portfolio';
+    const requestedResourceType = formData.get('resource_type') as 'image' | 'video' | 'raw' | 'auto' | null;
 
     if (!file) {
       return NextResponse.json({ message: 'No file provided.' }, { status: 400 });
@@ -64,20 +61,30 @@ export async function POST(req: Request) {
     }
 
     const mimeType = file.type || 'application/octet-stream';
-    const resourceType = resolveResourceType(mimeType);
+    const isPdf = mimeType === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    // Ensure resource_type: 'image' is used for PDFs to allow inline viewing in the browser
+    const resourceType = requestedResourceType || (isPdf ? 'image' : resolveResourceType(mimeType));
 
     console.log(`[upload POST] file="${file.name}" mime="${mimeType}" resource_type="${resourceType}" folder="${folder}"`);
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Do NOT set a fixed public_id — let Cloudinary generate a unique one.
-    // A fixed public_id with unique_filename:false causes conflicts when the
-    // same filename is re-uploaded and can make the upload silently fail.
+    // Pass the original filename to Cloudinary so it doesn't save as a random string
+    const cleanBaseName = file.name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 50);
+
+    const publicId = cleanBaseName ? `${cleanBaseName}_${Date.now()}` : undefined;
+
     const url = await uploadToCloudinary(buffer, folder, {
       resource_type: resourceType,
-      // unique_filename defaults to true — Cloudinary appends a random suffix
-      // so concurrent or repeated uploads of the same file never conflict.
+      use_filename: true,
+      unique_filename: true,
+      filename_override: file.name,
+      public_id: publicId,
+      mimeType: isPdf ? 'application/pdf' : mimeType,
     });
 
     console.log(`[upload POST] success url="${url}"`);

@@ -22,20 +22,28 @@ cloudinary.config({
 export async function uploadToCloudinary(
   buffer: Buffer,
   folder: string,
-  options: UploadApiOptions = {}
+  options: UploadApiOptions & { mimeType?: string } = {}
 ): Promise<string> {
+  const { mimeType: explicitMime, ...cloudinaryOpts } = options;
+  const isPdf = buffer.slice(0, 4).toString() === '%PDF';
+
   const uploadOptions: UploadApiOptions = {
     folder,
-    resource_type: 'auto', // overridden by options below if caller specifies one
-    ...options,
+    resource_type: isPdf ? 'image' : 'auto',
+    use_filename: true,
+    unique_filename: true,
+    ...cloudinaryOpts,
   };
 
   // Build a base64 data URI. Cloudinary accepts this directly without streaming.
-  // The MIME prefix must be syntactically valid; Cloudinary ignores it for 'raw'.
+  // When resource_type is 'image' and the file is a PDF, the MIME must be application/pdf
+  // so Cloudinary recognizes it as a document/PDF image rather than failing as an invalid JPEG.
   const mimeType =
-    options.resource_type === 'raw'   ? 'application/octet-stream' :
-    options.resource_type === 'video' ? 'video/mp4'                :
-                                        'image/jpeg';
+    explicitMime                               ? explicitMime               :
+    isPdf                                      ? 'application/pdf'          :
+    uploadOptions.resource_type === 'raw'      ? 'application/octet-stream' :
+    uploadOptions.resource_type === 'video'    ? 'video/mp4'                :
+                                                 'image/jpeg';
 
   const dataUri = `data:${mimeType};base64,${buffer.toString('base64')}`;
 

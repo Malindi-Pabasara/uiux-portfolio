@@ -16,10 +16,13 @@ interface Project {
 
 const DEFAULT: Project = { title: '', description: '', tags: [], caseStudyUrl: '', prototypeUrl: '', order: 0, imageUrl: '', category: 'fullstack' };
 
-async function uploadFile(file: File, folder: string): Promise<string> {
+async function uploadFile(file: File, folder: string, resourceType?: string): Promise<string> {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('folder', folder);
+  if (resourceType) {
+    fd.append('resource_type', resourceType);
+  }
   const res = await fetch('/api/upload', { method: 'POST', body: fd });
   const text = await res.text();
   if (!res.ok) {
@@ -123,7 +126,7 @@ export default function AdminProjects() {
           body: JSON.stringify({ url: editing.caseStudyUrl }),
         }).catch(() => {});
       }
-      const url = await uploadFile(file, 'portfolio/case-studies');
+      const url = await uploadFile(file, 'portfolio/case-studies', 'image');
       setEditing({ ...editing, caseStudyUrl: url });
       setCaseStudyMsg('✓ Case study PDF uploaded!');
     } catch (err: any) {
