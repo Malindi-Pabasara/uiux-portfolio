@@ -21,11 +21,27 @@ async function uploadFile(file: File, folder: string): Promise<string> {
   fd.append('file', file);
   fd.append('folder', folder);
   const res = await fetch('/api/upload', { method: 'POST', body: fd });
+  const text = await res.text();
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.message ?? 'Upload failed');
+    let msg = `Upload failed (HTTP ${res.status})`;
+    try {
+      const data = JSON.parse(text);
+      msg = data.message ?? data.error ?? msg;
+    } catch {}
+    throw new Error(msg);
   }
-  return (await res.json()).url as string;
+  const data = JSON.parse(text);
+  if (!data.url) throw new Error('Cloudinary returned no URL');
+  return data.url as string;
+}
+
+function fileName(url: string) {
+  try {
+    const name = decodeURIComponent(new URL(url).pathname.split('/').pop() ?? url);
+    return name.length > 32 ? name.slice(0, 29) + '...' : name;
+  } catch {
+    return url.length > 32 ? url.slice(0, 29) + '...' : url;
+  }
 }
 
 export default function AdminProjects() {
@@ -33,9 +49,12 @@ export default function AdminProjects() {
   const [editing, setEditing] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgUploading, setImgUploading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState('');
+  const [caseStudyMsg, setCaseStudyMsg] = useState('');
   const [activeTab, setActiveTab] = useState<'fullstack' | 'uiux'>('fullstack');
   const imgRef = useRef<HTMLInputElement>(null);
+  const caseStudyRef = useRef<HTMLInputElement>(null);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -84,6 +103,50 @@ export default function AdminProjects() {
     }
   };
 
+  const handleCaseStudyUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editing) return;
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      setCaseStudyMsg('✗ Only PDF files are allowed for case studies');
+      return;
+    }
+
+    setIsUploading(true);
+    setCaseStudyMsg('');
+    try {
+      // Delete old file if existing Cloudinary asset
+      if (editing.caseStudyUrl && editing.caseStudyUrl.includes('cloudinary')) {
+        await fetch('/api/upload', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: editing.caseStudyUrl }),
+        }).catch(() => {});
+      }
+      const url = await uploadFile(file, 'portfolio/case-studies');
+      setEditing({ ...editing, caseStudyUrl: url });
+      setCaseStudyMsg('✓ Case study PDF uploaded!');
+    } catch (err: any) {
+      setCaseStudyMsg(`✗ ${err.message || 'Upload failed'}`);
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleCaseStudyRemove = () => {
+    if (!editing) return;
+    if (editing.caseStudyUrl && editing.caseStudyUrl.includes('cloudinary')) {
+      fetch('/api/upload', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: editing.caseStudyUrl }),
+      }).catch(() => {});
+    }
+    setEditing({ ...editing, caseStudyUrl: '' });
+    setCaseStudyMsg('');
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
@@ -109,6 +172,8 @@ export default function AdminProjects() {
     else alert('Failed to delete project');
   };
 
+  const hasCaseStudy = !!editing?.caseStudyUrl && editing.caseStudyUrl !== '#';
+
   return (
     <div>
       <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
@@ -121,6 +186,7 @@ export default function AdminProjects() {
           onClick={() => {
             setEditing({ ...DEFAULT, category: activeTab });
             setUploadMsg('');
+            setCaseStudyMsg('');
           }}
         >
           + Add {activeTab === 'uiux' ? 'UI/UX' : 'Full-Stack'} Project
@@ -261,7 +327,7 @@ export default function AdminProjects() {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                      <button className="btn btn-ghost" style={{ padding: '6px 12px', fontSize: '.8rem' }} onClick={() => { setEditing(item); setUploadMsg(''); }}>Edit</button>
+                      <button className="btn btn-ghost" style={{ padding: '6px 12px', fontSize: '.8rem' }} onClick={() => { setEditing(item); setUploadMsg(''); setCaseStudyMsg(''); }}>Edit</button>
                       <button className="btn btn-danger" style={{ padding: '6px 12px', fontSize: '.8rem' }} onClick={() => handleDelete(item._id!)}>Delete</button>
                     </div>
                   </td>
@@ -339,12 +405,151 @@ export default function AdminProjects() {
                 placeholder="HTML, CSS, React"
               />
 
-              <label>Case Study URL</label>
-              <input
-                value={editing.caseStudyUrl}
-                onChange={e => setEditing({ ...editing, caseStudyUrl: e.target.value })}
-                placeholder="https://behance.net/your-case-study"
-              />
+              {/* Case Study (PDF Upload) */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <label style={{ margin: 0 }}>Case Study (PDF)</label>
+                  {hasCaseStudy && (
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      fontSize: '.72rem',
+                      fontWeight: 700,
+                      letterSpacing: '.04em',
+                      textTransform: 'uppercase',
+                      background: 'rgba(74,222,128,.12)',
+                      color: '#4ade80',
+                      border: '1px solid rgba(74,222,128,.3)',
+                      borderRadius: 6,
+                      padding: '2px 8px',
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80' }} />
+                      PDF Attached
+                    </span>
+                  )}
+                </div>
+
+                <input
+                  ref={caseStudyRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleCaseStudyUpload}
+                  style={{ display: 'none' }}
+                />
+
+                {hasCaseStudy ? (
+                  <div style={{
+                    borderRadius: 10,
+                    border: '1px solid var(--border)',
+                    background: 'var(--panel-2)',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      {/* PDF icon badge */}
+                      <div style={{
+                        width: 38, height: 44, borderRadius: 6, flexShrink: 0,
+                        background: 'rgba(239,68,68,.12)', border: '1px solid rgba(239,68,68,.3)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '.62rem', fontWeight: 800, color: '#f87171', letterSpacing: '.05em',
+                      }}>PDF</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: '.84rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {fileName(editing.caseStudyUrl)}
+                        </p>
+                        <p style={{ margin: '2px 0 0', fontSize: '.74rem', color: 'var(--muted)' }}>
+                          Stored on Cloudinary
+                        </p>
+                      </div>
+                      <a
+                        href={editing.caseStudyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          fontSize: '.82rem',
+                          fontWeight: 600,
+                          color: 'var(--purple)',
+                          textDecoration: 'none',
+                          padding: '6px 12px',
+                          borderRadius: 6,
+                          background: 'rgba(157,107,255,.08)',
+                          border: '1px solid rgba(157,107,255,.3)',
+                          whiteSpace: 'nowrap',
+                          transition: 'all .15s',
+                        }}
+                      >
+                        View File ↗
+                      </a>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', paddingTop: 8, borderTop: '1px solid rgba(36,43,82,.6)' }}>
+                      <button
+                        type="button"
+                        onClick={() => caseStudyRef.current?.click()}
+                        disabled={isUploading}
+                        className="btn btn-ghost"
+                        style={{ padding: '6px 12px', fontSize: '.8rem' }}
+                      >
+                        {isUploading ? 'Uploading…' : '🔄 Replace PDF'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCaseStudyRemove}
+                        disabled={isUploading}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          padding: '6px 12px', borderRadius: 8, fontSize: '.8rem', fontWeight: 500,
+                          cursor: 'pointer', background: 'rgba(248,113,113,.08)',
+                          border: '1px solid rgba(248,113,113,.3)', color: '#f87171',
+                        }}
+                      >
+                        🗑 Remove
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => caseStudyRef.current?.click()}
+                      disabled={isUploading}
+                      className="btn btn-ghost"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        fontSize: '.86rem',
+                        borderStyle: 'dashed',
+                        borderColor: 'var(--border)',
+                      }}
+                    >
+                      {isUploading ? (
+                        <>
+                          <svg style={{ animation: 'spin 1s linear infinite' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" opacity=".25"/><path d="M21 12a9 9 0 0 1-9 9"/>
+                          </svg>
+                          Uploading…
+                        </>
+                      ) : (
+                        <>📄 Upload Case Study (PDF)</>
+                      )}
+                    </button>
+                    <p style={{ margin: '6px 0 0', fontSize: '.74rem', color: 'var(--muted)' }}>
+                      Accepted: PDF — max 10 MB. Opens inline in a new browser tab.
+                    </p>
+                  </div>
+                )}
+                {caseStudyMsg && (
+                  <p style={{ fontSize: '.78rem', marginTop: 6, color: caseStudyMsg.startsWith('✓') ? '#4ade80' : '#f87171' }}>
+                    {caseStudyMsg}
+                  </p>
+                )}
+              </div>
 
               <label>Prototype URL</label>
               <input
@@ -358,7 +563,7 @@ export default function AdminProjects() {
 
               <div className="admin-actions" style={{ marginTop: 24 }}>
                 <button type="button" className="btn btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={imgUploading}>Save Project</button>
+                <button type="submit" className="btn btn-primary" disabled={imgUploading || isUploading}>Save Project</button>
               </div>
             </form>
           </div>
