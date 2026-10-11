@@ -1,6 +1,11 @@
 import RevealWrapper from './RevealWrapper';
 
-interface SkillItem { _id: string; category: string; items: string[]; }
+interface SkillItem {
+  _id: string;
+  category: string;
+  items: string[];
+  portfolioType?: 'Full-Stack' | 'UI/UX' | string;
+}
 
 const ICONS = [
   // Design
@@ -11,16 +16,24 @@ const ICONS = [
   <svg key="tech" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
 ];
 
-export default function Skills({ items }: { items: SkillItem[] }) {
+export default function Skills({
+  items = [],
+  skills = items,
+}: {
+  items?: SkillItem[];
+  skills?: SkillItem[];
+}) {
+  const uiuxSkills = skills.filter((skill) => skill.portfolioType === 'UI/UX');
+
   return (
     <section id="skills">
       <div className="wrap">
         <p className="eyebrow">skills</p>
         <h2 className="sec-title">What I work with</h2>
-        <div className="skill-grid">
-          {items.map((skill, idx) => (
-            <RevealWrapper key={skill._id}>
-              <div className="skill-card">
+        <div className="grid grid-cols-1 gap-4 w-full">
+          {uiuxSkills.map((skill, idx) => (
+            <RevealWrapper key={skill._id} className="w-full">
+              <div className="skill-card w-full">
                 <div className="icon">{ICONS[idx % ICONS.length]}</div>
                 <h3>{skill.category}</h3>
                 <div className="chips">
