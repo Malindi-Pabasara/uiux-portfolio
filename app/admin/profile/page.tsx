@@ -212,6 +212,7 @@ export default function AdminProfile() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [fullstackCvUploading, setFullstackCvUploading] = useState(false);
   const [uiuxCvUploading, setUiuxCvUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'fullstack' | 'uiux'>('fullstack');
 
   useEffect(() => {
     fetch('/api/profile').then(r => {
@@ -500,26 +501,81 @@ export default function AdminProfile() {
               onUpload={handleAvatarUpload}
               onDelete={handleAvatarDelete}
             />
-            <FileUploadBlock
-              label="Fullstack CV"
-              hint="Accepted: PDF — max 10 MB. Used on the Fullstack/Dev portfolio. Updates automatically."
-              accept=".pdf"
-              uploading={fullstackCvUploading}
-              currentUrl={form.fullstackCvUrl}
-              previewType="document"
-              onUpload={handleFullstackCvUpload}
-              onDelete={handleFullstackCvDelete}
-            />
-            <FileUploadBlock
-              label="UI/UX CV"
-              hint="Accepted: PDF — max 10 MB. Used on the UI/UX portfolio. Updates automatically."
-              accept=".pdf"
-              uploading={uiuxCvUploading}
-              currentUrl={form.uiuxCvUrl}
-              previewType="document"
-              onUpload={handleUiuxCvUpload}
-              onDelete={handleUiuxCvDelete}
-            />
+            {/* CV Upload Section with Tab Switch */}
+            <div className="flex flex-col gap-3">
+              {/* Tab UI: Modern Tailwind CSS tab/toggle menu above the CV upload section */}
+              <div className="flex items-center justify-between p-1.5 rounded-xl bg-[#080b16] border border-[#242b52]">
+                <div className="flex w-full p-0.5 gap-1.5" role="tablist" aria-label="CV Portfolio Mode">
+                  <button
+                    type="button"
+                    role="tab"
+                    id="tab-fullstack"
+                    aria-selected={activeTab === 'fullstack'}
+                    aria-controls="panel-fullstack-cv"
+                    onClick={() => setActiveTab('fullstack')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+                      activeTab === 'fullstack'
+                        ? 'bg-gradient-to-r from-[#9d6bff] to-[#6d28d9] text-white shadow-md shadow-[#9d6bff]/25 font-semibold'
+                        : 'text-[#9099bb] hover:text-[#eef0fb] hover:bg-[#141a38]'
+                    }`}
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    <span>Full-Stack Portfolio</span>
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    id="tab-uiux"
+                    aria-selected={activeTab === 'uiux'}
+                    aria-controls="panel-uiux-cv"
+                    onClick={() => setActiveTab('uiux')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+                      activeTab === 'uiux'
+                        ? 'bg-gradient-to-r from-[#9d6bff] to-[#6d28d9] text-white shadow-md shadow-[#9d6bff]/25 font-semibold'
+                        : 'text-[#9099bb] hover:text-[#eef0fb] hover:bg-[#141a38]'
+                    }`}
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                    <span>UI/UX Portfolio</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Conditional CV Rendering */}
+              {activeTab === 'fullstack' && (
+                <div id="panel-fullstack-cv" role="tabpanel" aria-labelledby="tab-fullstack">
+                  <FileUploadBlock
+                    label="Fullstack CV"
+                    hint="Accepted: PDF — max 10 MB. Used on the Fullstack/Dev portfolio. Updates automatically."
+                    accept=".pdf"
+                    uploading={fullstackCvUploading}
+                    currentUrl={form.fullstackCvUrl}
+                    previewType="document"
+                    onUpload={handleFullstackCvUpload}
+                    onDelete={handleFullstackCvDelete}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'uiux' && (
+                <div id="panel-uiux-cv" role="tabpanel" aria-labelledby="tab-uiux">
+                  <FileUploadBlock
+                    label="UI/UX CV"
+                    hint="Accepted: PDF — max 10 MB. Used on the UI/UX portfolio. Updates automatically."
+                    accept=".pdf"
+                    uploading={uiuxCvUploading}
+                    currentUrl={form.uiuxCvUrl}
+                    previewType="document"
+                    onUpload={handleUiuxCvUpload}
+                    onDelete={handleUiuxCvDelete}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
