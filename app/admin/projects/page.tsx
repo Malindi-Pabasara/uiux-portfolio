@@ -38,6 +38,61 @@ async function uploadFile(file: File, folder: string, resourceType?: string): Pr
   return data.url as string;
 }
 
+function sanitizeCaseStudyUrl(url?: string): string {
+  if (!url || url === '#') return '';
+  return url
+    .replace(/\/fl_attachment:[^/]+/g, '')
+    .replace(/\/fl_attachment\/?/g, '/')
+    .replace(/,fl_attachment/g, '')
+    .replace(/fl_attachment,?/g, '')
+    .replace(/fl_attachment/g, '');
+}
+
+/**
+ * Direct client-side unsigned upload to Cloudinary.
+ * Bypasses Vercel's 4.5MB serverless request body limit and supports up to 100MB.
+ * Appends resource_type: 'image' to ensure Cloudinary serves PDF inline instead of forcing download.
+ */
+async function uploadCaseStudyDirect(file: File): Promise<string> {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'qkv9xaot';
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'portfolio_unsigned';
+
+  if (!cloudName) {
+    throw new Error('Cloudinary cloud name is not configured.');
+  }
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', uploadPreset);
+  // CRITICAL: resource_type MUST be 'image' so Cloudinary treats PDF as inline-viewable document
+  fd.append('resource_type', 'image');
+  fd.append('folder', 'portfolio/case-studies');
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: fd,
+  });
+
+  const text = await res.text();
+  let data: any = {};
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(`Upload failed (HTTP ${res.status})`);
+  }
+
+  if (!res.ok) {
+    throw new Error(data.error?.message || `Upload failed (HTTP ${res.status})`);
+  }
+
+  const rawUrl = (data.secure_url || data.url) as string;
+  if (!rawUrl) {
+    throw new Error('Cloudinary returned no URL');
+  }
+
+  return sanitizeCaseStudyUrl(rawUrl);
+}
+
 function fileName(url: string) {
   try {
     const name = decodeURIComponent(new URL(url).pathname.split('/').pop() ?? url);
@@ -115,6 +170,13 @@ export default function AdminProjects() {
       return;
     }
 
+    // 100MB Direct Client Upload validation (100 * 1024 * 1024)
+    const MAX_CASE_STUDY_BYTES = 100 * 1024 * 1024;
+    if (file.size > MAX_CASE_STUDY_BYTES) {
+      setCaseStudyMsg('✗ File exceeds 100MB limit');
+      return;
+    }
+
     setIsUploading(true);
     setCaseStudyMsg('');
     try {
@@ -126,7 +188,8 @@ export default function AdminProjects() {
           body: JSON.stringify({ url: editing.caseStudyUrl }),
         }).catch(() => {});
       }
-      const url = await uploadFile(file, 'portfolio/case-studies', 'image');
+      // Direct client-side unsigned upload to Cloudinary (bypassing Vercel 4.5MB limit)
+      const url = await uploadCaseStudyDirect(file);
       setEditing({ ...editing, caseStudyUrl: url });
       setCaseStudyMsg('✓ Case study PDF uploaded!');
     } catch (err: any) {
@@ -468,7 +531,7 @@ export default function AdminProjects() {
                         </p>
                       </div>
                       <a
-                        href={editing.caseStudyUrl}
+                        href={sanitizeCaseStudyUrl(editing.caseStudyUrl) || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
@@ -543,7 +606,7 @@ export default function AdminProjects() {
                       )}
                     </button>
                     <p style={{ margin: '6px 0 0', fontSize: '.74rem', color: 'var(--muted)' }}>
-                      Accepted: PDF — max 10 MB. Opens inline in a new browser tab.
+                      Accepted: PDF — max 100 MB. Direct client upload opens inline in a new browser tab.
                     </p>
                   </div>
                 )}

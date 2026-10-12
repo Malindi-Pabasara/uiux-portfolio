@@ -21,6 +21,18 @@ const CARD_GRADIENTS = [
   'from-[#6d28d9]/20 via-[#41c7ff]/10 to-[#9d6bff]/15',
 ];
 
+function getSafeCaseStudyUrl(url?: string): string | undefined {
+  if (!url || url === '#' || url.trim() === '') return undefined;
+  // Ensure the URL does not contain fl_attachment so it opens inline in browser instead of forcing download
+  return url
+    .replace(/\/fl_attachment:[^/]+/g, '')
+    .replace(/\/fl_attachment\/?/g, '/')
+    .replace(/,fl_attachment/g, '')
+    .replace(/fl_attachment,?/g, '')
+    .replace(/fl_attachment/g, '');
+}
+
+
 const defaultProjects: Project[] = [
   {
     _id: '1',
@@ -229,18 +241,23 @@ export default function Projects() {
 
                     {/* Action buttons */}
                     <div className="proj-case-actions">
-                      <a
-                        href={proj.caseStudyUrl && proj.caseStudyUrl !== '#' ? proj.caseStudyUrl : undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`proj-case-btn-primary${!proj.caseStudyUrl || proj.caseStudyUrl === '#' ? ' proj-case-btn-disabled' : ''}`}
-                        {...(!proj.caseStudyUrl || proj.caseStudyUrl === '#' ? { 'aria-disabled': 'true' } : {})}
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        View Case Study
-                      </a>
+                      {(() => {
+                        const caseStudyHref = getSafeCaseStudyUrl(proj.caseStudyUrl);
+                        return (
+                          <a
+                            href={caseStudyHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`proj-case-btn-primary${!caseStudyHref ? ' proj-case-btn-disabled' : ''}`}
+                            {...(!caseStudyHref ? { 'aria-disabled': 'true' } : {})}
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            View Case Study
+                          </a>
+                        );
+                      })()}
                       <a
                         href={proj.prototypeUrl && proj.prototypeUrl !== '#' ? proj.prototypeUrl : undefined}
                         className={`proj-case-btn-ghost${!proj.prototypeUrl || proj.prototypeUrl === '#' ? ' proj-case-btn-disabled' : ''}`}
