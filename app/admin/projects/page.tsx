@@ -14,6 +14,10 @@ interface Project {
   category?: 'fullstack' | 'uiux';
 }
 
+// Hardcoded maximum file size for Case Study PDF uploads: 100MB (104857600 bytes)
+export const MAX_FILE_SIZE = 104857600; // 100MB (explicitly updated from 10485760 / 10MB)
+export const MAX_CASE_STUDY_SIZE = MAX_FILE_SIZE;
+
 const DEFAULT: Project = { title: '', description: '', tags: [], caseStudyUrl: '', prototypeUrl: '', order: 0, imageUrl: '', category: 'fullstack' };
 
 async function uploadFile(file: File, folder: string, resourceType?: string): Promise<string> {
@@ -171,10 +175,9 @@ export default function AdminProjects() {
     }
 
     // Manual validation check: 100MB (104857600 bytes)
-    const maxSize = 104857600; // 100MB (updated from 10485760 / 10MB)
-    const MAX_CASE_STUDY_BYTES = maxSize;
-    if (file.size > MAX_CASE_STUDY_BYTES) {
-      setCaseStudyMsg('✗ File size too large. Maximum is 100MB');
+    const maxSize = MAX_FILE_SIZE; // 104857600 (100MB)
+    if (file.size > maxSize) {
+      setCaseStudyMsg(`✗ File size too large. Got ${file.size}. Maximum is ${maxSize}`);
       return;
     }
 
@@ -194,7 +197,12 @@ export default function AdminProjects() {
       setEditing({ ...editing, caseStudyUrl: url });
       setCaseStudyMsg('✓ Case study PDF uploaded!');
     } catch (err: any) {
-      setCaseStudyMsg(`✗ ${err.message || 'Upload failed'}`);
+      const msg = err.message || 'Upload failed';
+      if (msg.includes('10485760')) {
+        setCaseStudyMsg(`✗ Cloudinary Free Tier rejected upload: "${msg}". (Note: Frontend allows 100MB/104857600, but your Cloudinary account's Free Plan media limit caps image resources at 10MB/10485760 bytes).`);
+      } else {
+        setCaseStudyMsg(`✗ ${msg}`);
+      }
     } finally {
       setIsUploading(false);
       e.target.value = '';

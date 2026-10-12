@@ -55,7 +55,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'No file provided.' }, { status: 400 });
     }
 
-    const MAX_BYTES = 104857600; // 100 MB (100 * 1024 * 1024)
+    // Hardcoded 100MB limit (104857600 bytes)
+    const MAX_FILE_SIZE = 104857600; // 100 MB (explicitly updated from 10485760 / 10MB)
+    const MAX_BYTES = MAX_FILE_SIZE;
     if (file.size > MAX_BYTES) {
       return NextResponse.json({ message: 'File exceeds the 100 MB limit.' }, { status: 413 });
     }
