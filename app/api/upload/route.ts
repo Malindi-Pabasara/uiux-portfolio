@@ -55,9 +55,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'No file provided.' }, { status: 400 });
     }
 
-    const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+    const MAX_BYTES = 104857600; // 100 MB (100 * 1024 * 1024)
     if (file.size > MAX_BYTES) {
-      return NextResponse.json({ message: 'File exceeds the 10 MB limit.' }, { status: 413 });
+      return NextResponse.json({ message: 'File exceeds the 100 MB limit.' }, { status: 413 });
     }
 
     const mimeType = file.type || 'application/octet-stream';

@@ -170,10 +170,11 @@ export default function AdminProjects() {
       return;
     }
 
-    // 100MB Direct Client Upload validation (100 * 1024 * 1024)
-    const MAX_CASE_STUDY_BYTES = 100 * 1024 * 1024;
+    // Manual validation check: 100MB (104857600 bytes)
+    const maxSize = 104857600; // 100MB (updated from 10485760 / 10MB)
+    const MAX_CASE_STUDY_BYTES = maxSize;
     if (file.size > MAX_CASE_STUDY_BYTES) {
-      setCaseStudyMsg('✗ File exceeds 100MB limit');
+      setCaseStudyMsg('✗ File size too large. Maximum is 100MB');
       return;
     }
 
@@ -502,6 +503,7 @@ export default function AdminProjects() {
                   accept=".pdf,application/pdf"
                   onChange={handleCaseStudyUpload}
                   style={{ display: 'none' }}
+                  data-max-size={104857600}
                 />
 
                 {hasCaseStudy ? (
